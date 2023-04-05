@@ -8,7 +8,8 @@ import os
 from utils import choose
 #from class_mdp import MDP
 from markov_decision_process import MarkovDecisionProcess
-from simulated_markov_decision_process import SimulatedMarkovDecisionProcess
+from mdp_simulator import MDPSimulator
+from mdp_checker import MDPChecker
 
         
 class gramPrintListener(gramListener):
@@ -66,8 +67,11 @@ def main():
     walker = ParseTreeWalker()
     walker.walk(printer, tree)
 
-    simulator = SimulatedMarkovDecisionProcess(mdp)
+    simulator = MDPSimulator(mdp)
     simulator.launch()
+
+    checker = MDPChecker(mdp)
+    checker.launch()
 
     
 

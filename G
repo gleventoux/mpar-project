@@ -14,6 +14,6 @@ digraph G {
 	1 -> S0 [label=0.3 color=blue fontcolor=blue]
 	1 -> S1 [label=0.6 color=blue fontcolor=blue]
 	S2 -> 2 [label=c color=black dir=none fontcolor=magenta]
-	2 -> S0 [label=0.5 color=magenta fontcolor=magenta]
-	2 -> S1 [label=0.5 color=magenta fontcolor=magenta]
+	2 -> S0 [label=0.25 color=magenta fontcolor=magenta]
+	2 -> S1 [label=0.75 color=magenta fontcolor=magenta]
 }

@@ -1,54 +1,54 @@
-from graph_tool.all import *
-from gi.repository import Gtk, Gdk
+import graphviz
 
 class MDPGraph:
 
-    def __init__(self,mdp):
-        self.g = g = Graph()
-        self.vertex = {}
-        self.edges = {}
-        self.actions_vertex = {}
+    def __init__(self,  nom, mdp):
 
-        # Define vertex proprieties
-        vname = g.new_vertex_property("string")
-        vsize = g.new_vertex_property("int")
-        vcurrent = g.new_vertex_property("bool")
+        depart = list(mdp.states.keys())[0]
+        # Define the MDP as a directed graph
+        g = graphviz.Digraph('G', filename='mdp.gv', engine='dot')
 
-        # Define edge proprieties
-        eweight = g.new_edge_property("string")
-
-        # Add state to the graphe
+        # Define the nodes
+        g.attr('node', shape='circle')
+        g.node(depart, peripheries='2')
         for state in mdp.states.values():
-            v = g.add_vertex()
-            self.vertex[state.name] = v
-            vname[v] = state.name
-            vsize[v] = 10
+            if state.name != depart:
+                g.node(state.name)
 
-        # Add edge to the graph
+        # Define the actions and transitions
+        g.attr('node', shape='point')
+        colors = ['red', 'blue', 'magenta']
+        ind_color = 0
+        ind_action = 0
         for state in mdp.states.values():
-            start = self.vertex[state.name]
             for transitions in state.transitions.values():
                 action = transitions.action
-                total_weight = sum(transitions.weights)
-                if action != None:
-                    a = g.add_vertex()
-                    vname[a] = action
-                    g.add_edge(start,a)
-                    start = a
-                for target, weight in zip(transitions.targets,transitions.weights):
-                    v = self.vertex[target]
-                    e = g.add_edge(start,v)
-                    eweight[e] = str(weight/total_weight)
+                targets = transitions.targets
+                weights = transitions.weights
+                total_weight = sum(weights)
+                if action == None:
+                    for target, weight in zip(targets,weights):
+                        g.edge(state.name, target, label= str(weight/total_weight))
+                else:
+                    color = colors[ind_color%3]
+                    ind_color += 1
+                    g.edge(state.name, str(ind_action), label=action,  dir='none', color='black', fontcolor=color)
+                    for target, weight in zip(targets,weights):
+                        g.edge(str(ind_action),target, label= str(weight/total_weight),color=color, fontcolor=color)
+                    ind_action += 1
+                       
+        # Render the graph
+        g.render(nom, format='png', view=False)
+        self.g = g
+        self.nom = nom
 
-        graph_draw(self.g,output_size=(1000, 1000), vertex_color=[1,1,1,0],vertex_text=vname,edge_text=eweight,vertex_font_size=18,edge_font_size=18,
-            vertex_size=vsize, edge_pen_width=1.2,
-           output="price.pdf")
+
+    def update(self, previous_node, node):
+        g = self.g
+        g.node(previous_node, peripheries='1')
+        g.node(node, peripheries='2')
+        g.render(self.nom, format='png', view=False)
+        self.g = g
+
+
         
-
-    
-                
-
-                    
-            
-                    
-                    

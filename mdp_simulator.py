@@ -3,36 +3,47 @@ from utils import choose
 import random as rd
 from mdp_graph import MDPGraph
 
-class SimulatedMarkovDecisionProcess:
+class MDPSimulator:
     
     def __init__(self,mdp):
         self.mdp = mdp
-        self.graph = MDPGraph(mdp)
+        
 
     def move(self,state,action):
         targets = self.mdp.states[state].transitions[action].targets
         weights = self.mdp.states[state].transitions[action].weights
         next = rd.choices(targets,weights).pop()
+        return next
 
-    def again(self,count,iter):
-        c1 = count < iter
-        return c1
+    def again(self,mode,count,iter):
+        match mode:
+            case "manual":
+                print("Continue ?")
+                answer = choose("answer",["yes","no"])
+                return answer == "yes"
+            case _:
+                return count < iter
+
 
     def run(self,mode,iter,start):
         current = start
         count = 0
         path = [current]
         action = None
-        while self.again(count,iter):
+        while self.again(mode,count,iter):
             actions = list(self.mdp.states[current].transitions.keys())
             match mode:
-                case "automatique":
+                case "automatic":
                     action = rd.choices(actions).pop()
-                case "manuel":
+                case "semi-automatic":
+                    action = choose("action",actions)
+                case "manual":
                     action = choose("action",actions)
             next = self.move(current,action)
+            self.graph.update(current,next)
             path += [action,next]
             count += 1
+            current = next
         return path
 
 
@@ -44,7 +55,10 @@ class SimulatedMarkovDecisionProcess:
 
         while resimulate:
 
-            mode = choose("mode",["automatique","manuel"])
+            self.graph = MDPGraph("G",self.mdp)
+            mode = choose("mode",["automatic","semi-automatic","manual","pass to the checker"])
+            if mode == "pass to the checker":
+                break
             start = choose("fisrt state",list(self.mdp.states.keys()))
             iter = int(input("Number of iterations = "))
 
